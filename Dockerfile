@@ -1,24 +1,20 @@
 FROM python:3.11-slim
 
-# Системные зависимости
 RUN apt-get update && apt-get install -y \
     ffmpeg \
     curl \
+    python3-pip \
     && rm -rf /var/lib/apt/lists/*
 
+# Установка yt-dlp напрямую (свежая версия)
+RUN curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o /usr/local/bin/yt-dlp && \
+    chmod a+rx /usr/local/bin/yt-dlp
+
 WORKDIR /app
-
-# Python зависимости
 COPY requirements.txt .
-RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -U yt-dlp && \
-    pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Код бота
-COPY bot.py .
-
-# Папка для скачивания
+COPY . .
 RUN mkdir -p downloads
 
-# Запуск
 CMD ["python", "-u", "bot.py"]
